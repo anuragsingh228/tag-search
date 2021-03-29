@@ -3,9 +3,11 @@ const _ = require("lodash");
 const router = express.Router();
 const Article = require('../models/articles');
 const Tag = require('../models/tags');
+var ObjectId = require('mongoose').Types.ObjectId;
+/***********************************  Get all articles    *****************************************************/
 
 
-router.get('/allarticles', (req, res, next) => {
+router.get('/', (req, res, next) => {
     Article.find((err, articles) => {
         if (err) {
             console.log(err);
@@ -16,6 +18,8 @@ router.get('/allarticles', (req, res, next) => {
     })
 })
 
+
+/****************************************   Adding New Article    ******************************************/
 
 
 router.post('/addarticle', (req, res, next) => {
@@ -85,5 +89,86 @@ router.post('/addarticle', (req, res, next) => {
 });
 
 
+/*******************************************   Retrieve an Existing Article by Id  ********************************/
+
+
+router.get('/:id', (req, res) => {
+    if (!ObjectId.isValid(req.params.id)) {
+        return res.status(400).send('No article with given Id');
+    }
+    Article.findById(req.params.id, (err, article) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            res.send(article);
+        }
+    })
+})
+
+/*****************************************  Update an existing Article   *****************************************/
+router.put('/:id', (req, res) => {
+    if (!ObjectId.isValid(req.params.id)) {
+        return res.status(400).send('No article with given Id');
+    }
+
+    var narticle = {
+        title: req.body.title,
+        content: req.body.content,
+        tags: req.body.tags
+    };
+
+    Article.findByIdAndUpdate(req.params.id, { $set: narticle }, { new: true }, (err, article) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            console.log(article);
+            tagArray = article.tags;
+            for (let index = 0; index < tagArray.length; index++) {
+                console.log(tagArray[index]);
+                Tag.findOne({ name: tagArray[index] }, (err, tag) => {
+                    console.log("index", index, tag);
+                    if (err) {
+
+                        console.log(err);
+                    }
+                    else {
+                        if (_.isEmpty(tag)) {
+
+                            console.log("************************************");
+                            console.log(index);
+                            console.log(tagArray[index]);
+
+                            const newTag = new Tag(
+                                {
+                                    name: tagArray[index],
+                                    articles: [article._id]
+                                }
+                            )
+
+                            Tag.addTag(newTag, (err, demotag) => {
+                                if (err) {
+                                    console.log(err);
+                                }
+                                else {
+                                    console.log("tag added");
+                                }
+                            })
+
+                        }
+
+                    }
+                });
+
+
+            }
+            res.json({ success: true, msg: 'Article Updated' });
+        }
+    })
+
+
+
+})
 
 module.exports = router;
