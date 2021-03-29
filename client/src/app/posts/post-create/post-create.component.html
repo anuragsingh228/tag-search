@@ -30,6 +30,37 @@
         >Please Provide Content for Article</mat-error
       >
     </mat-form-field>
+    <mat-form-field class="example-chip-list">
+      <mat-label>Add Tag </mat-label>
+      <mat-chip-list #chipList aria-label="Tag selection">
+        <mat-chip
+          *ngFor="let tag of tags"
+          [selectable]="selectable"
+          [removable]="removable"
+          (removed)="remove(tag)"
+        >
+          {{ tag }}
+          <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+        </mat-chip>
+        <input
+          placeholder="New tag..."
+          #tagInput
+          [formControl]="tagCtrl"
+          [matAutocomplete]="auto"
+          [matChipInputFor]="chipList"
+          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+          (matChipInputTokenEnd)="add($event)"
+        />
+      </mat-chip-list>
+      <mat-autocomplete
+        #auto="matAutocomplete"
+        (optionSelected)="selected($event)"
+      >
+        <mat-option *ngFor="let tag of filteredTags | async" [value]="tag">
+          {{ tag }}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
     <button mat-raised-button color="primary" type="submit">Save Post</button>
   </form>
 </mat-card>
