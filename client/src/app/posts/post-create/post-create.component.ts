@@ -27,7 +27,7 @@ export class PostCreateComponent {
   tags: string[] = [];
   alltags: string[] = ['Apple', 'Lemon', 'Lime', 'Orange', 'Strawberry'];
 
-  @ViewChild('tagInput') fruitInput: ElementRef<HTMLInputElement>;
+  @ViewChild('tagInput') tagInput: ElementRef<HTMLInputElement>;
   @ViewChild('auto') matAutocomplete: MatAutocomplete;
 
   constructor(public postsService: PostsService) {
@@ -65,7 +65,7 @@ export class PostCreateComponent {
 
   selected(event: MatAutocompleteSelectedEvent): void {
     this.tags.push(event.option.viewValue);
-    this.fruitInput.nativeElement.value = '';
+    this.tagInput.nativeElement.value = '';
     this.tagCtrl.setValue(null);
   }
 
@@ -73,14 +73,14 @@ export class PostCreateComponent {
     const filterValue = value.toLowerCase();
 
     return this.alltags.filter(
-      (fruit) => fruit.toLowerCase().indexOf(filterValue) === 0
+      (tag) => tag.toLowerCase().indexOf(filterValue) === 0
     );
   }
   onAddPost(form: NgForm) {
     if (form.invalid) {
       return;
     }
-    console.log(form.value.title);
+    console.log(form.value);
     console.log(this.tags);
 
     this.postsService.addPost(form.value.title, form.value.content, this.tags);

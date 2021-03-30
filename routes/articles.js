@@ -74,7 +74,7 @@ router.post("/addarticle", (req, res, next) => {
           }
         });
       }
-      res.json({ success: true, msg: "Article Added" });
+      res.json({ msg: "Article Added" });
     }
   });
 });
