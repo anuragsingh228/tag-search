@@ -11,6 +11,12 @@
     <mat-action-row>
       <button mat-button color="accent">Edit</button>
     </mat-action-row>
+    <mat-label>Tags</mat-label>
+    <mat-chip-list aria-label="Color selection">
+      <mat-chip *ngFor="let tag of post.tags" selected>
+        {{ tag }}
+      </mat-chip>
+    </mat-chip-list>
   </mat-expansion-panel>
 </mat-accordion>
 

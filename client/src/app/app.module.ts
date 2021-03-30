@@ -17,6 +17,7 @@ import { PostListComponent } from './posts/post-list/post-list.component';
 /************************ */
 import { DemoMaterialModule } from './material-module';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { HttpClientModule } from '@angular/common/http';
 
 /************************** */
 @NgModule({
@@ -38,6 +39,7 @@ import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
     MatExpansionModule,
     DemoMaterialModule,
     ReactiveFormsModule,
+    HttpClientModule,
   ],
 
   providers: [
