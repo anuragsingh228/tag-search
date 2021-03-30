@@ -9,7 +9,10 @@
       {{ post.content }}
     </p>
     <mat-action-row>
-      <button mat-button color="accent">Edit</button>
+      <button mat-button color="primary">Edit</button>
+      <button mat-button color="warn" (click)="onDelete(post.id)">
+        Delete
+      </button>
     </mat-action-row>
     <mat-label>Tags</mat-label>
     <mat-chip-list aria-label="Color selection">
