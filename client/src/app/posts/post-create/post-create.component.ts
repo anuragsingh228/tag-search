@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { PostsService } from '../posts.service';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
@@ -11,13 +11,16 @@ import {
 import { MatChipInputEvent } from '@angular/material/chips';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+import { Route } from '@angular/compiler/src/core';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { Post } from '../post.model';
 
 @Component({
   selector: 'app-post-create',
   templateUrl: './post-create.component.html',
   styleUrls: ['./post-create.component.css'],
 })
-export class PostCreateComponent {
+export class PostCreateComponent implements OnInit {
   visible = true;
   selectable = true;
   removable = true;
@@ -26,11 +29,14 @@ export class PostCreateComponent {
   filteredTags: Observable<string[]>;
   tags: string[] = [];
   alltags: string[] = ['Apple', 'Lemon', 'Lime', 'Orange', 'Strawberry'];
+  private mode = 'create';
+  private postId: string;
+  post: Post;
 
   @ViewChild('tagInput') tagInput: ElementRef<HTMLInputElement>;
   @ViewChild('auto') matAutocomplete: MatAutocomplete;
 
-  constructor(public postsService: PostsService) {
+  constructor(public postsService: PostsService, public route: ActivatedRoute) {
     this.filteredTags = this.tagCtrl.valueChanges.pipe(
       startWith(null),
       map((tag: string | null) =>
@@ -38,6 +44,28 @@ export class PostCreateComponent {
       )
     );
   }
+
+  ngOnInit() {
+    this.route.paramMap.subscribe((paraMap: ParamMap) => {
+      if (paraMap.has('postId')) {
+        this.mode = 'edit';
+        this.postId = paraMap.get('postId');
+        this.postsService.getPost(this.postId).subscribe((postData) => {
+          this.post = {
+            id: postData._id,
+            title: postData.title,
+            content: postData.content,
+            tags: postData.tags,
+          };
+          this.tags = this.post.tags;
+        });
+      } else {
+        this.mode = 'create';
+        this.postId = null;
+      }
+    });
+  }
+
   add(event: MatChipInputEvent): void {
     const input = event.input;
     const value = event.value;
@@ -76,14 +104,27 @@ export class PostCreateComponent {
       (tag) => tag.toLowerCase().indexOf(filterValue) === 0
     );
   }
-  onAddPost(form: NgForm) {
+  onSavePost(form: NgForm) {
     if (form.invalid) {
       return;
+    }
+    if (this.mode === 'create') {
+      this.postsService.addPost(
+        form.value.title,
+        form.value.content,
+        this.tags
+      );
+    } else {
+      this.postsService.updatePost(
+        this.postId,
+        form.value.title,
+        form.value.content,
+        this.tags
+      );
     }
     console.log(form.value);
     console.log(this.tags);
 
-    this.postsService.addPost(form.value.title, form.value.content, this.tags);
     form.resetForm();
     this.tags = [];
   }
