@@ -9,12 +9,13 @@ import { Router } from '@angular/router';
 export class PostsService {
   private posts: Post[] = [];
   private postsUpdated = new Subject<Post[]>();
+  private alltagsp = [];
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  getPosts() {
+  getPosts(filter: string) {
     this.http
-      .get<{ message: string; posts: any }>('http://localhost:3000/')
+      .get<{ message: string; posts: any }>('http://localhost:3000/' + filter)
       .pipe(
         map((postData) => {
           return postData.posts.map((post) => {
@@ -28,7 +29,6 @@ export class PostsService {
         })
       )
       .subscribe((transformedPosts) => {
-        console.log(transformedPosts);
         this.posts = transformedPosts;
         this.postsUpdated.next([...this.posts]);
       });
@@ -63,7 +63,6 @@ export class PostsService {
       .subscribe((responseData) => {
         const id = responseData.articleId;
         console.log('*****************************');
-        console.log(responseData);
         post.id = id;
         console.log(responseData.msg);
         this.posts.push(post);
@@ -90,5 +89,9 @@ export class PostsService {
       this.posts = updatedPosts;
       this.postsUpdated.next([...this.posts]);
     });
+  }
+
+  getalltag() {
+    return this.http.get('http://localhost:3000/all/tags');
   }
 }

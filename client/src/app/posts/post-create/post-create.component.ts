@@ -28,7 +28,7 @@ export class PostCreateComponent implements OnInit {
   tagCtrl = new FormControl();
   filteredTags: Observable<string[]>;
   tags: string[] = [];
-  alltags: string[] = ['Apple', 'Lemon', 'Lime', 'Orange', 'Strawberry'];
+  alltags: string[] = [];
   private mode = 'create';
   private postId: string;
   post: Post;
@@ -36,16 +36,21 @@ export class PostCreateComponent implements OnInit {
   @ViewChild('tagInput') tagInput: ElementRef<HTMLInputElement>;
   @ViewChild('auto') matAutocomplete: MatAutocomplete;
 
-  constructor(public postsService: PostsService, public route: ActivatedRoute) {
-    this.filteredTags = this.tagCtrl.valueChanges.pipe(
-      startWith(null),
-      map((tag: string | null) =>
-        tag ? this._filter(tag) : this.alltags.slice()
-      )
-    );
-  }
+  constructor(
+    public postsService: PostsService,
+    public route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
+    this.postsService.getalltag().subscribe((res: any) => {
+      this.alltags = res.alltags;
+      this.filteredTags = this.tagCtrl.valueChanges.pipe(
+        startWith(null),
+        map((tag: string | null) =>
+          tag ? this._filter(tag) : this.alltags.slice()
+        )
+      );
+    });
     this.route.paramMap.subscribe((paraMap: ParamMap) => {
       if (paraMap.has('postId')) {
         this.mode = 'edit';
@@ -122,8 +127,6 @@ export class PostCreateComponent implements OnInit {
         this.tags
       );
     }
-    console.log(form.value);
-    console.log(this.tags);
 
     form.resetForm();
     this.tags = [];

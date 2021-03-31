@@ -2,3 +2,10 @@
   display: block;
   margin-top: 1rem;
 }
+.searchbtn {
+  width: 10%;
+  margin-left: 50px;
+}
+.example-chip-list {
+  width: 80%;
+}
