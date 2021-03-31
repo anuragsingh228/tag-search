@@ -1,31 +1,24 @@
-const mongoose = require('mongoose');
-const config = require('../config/database');
+const mongoose = require("mongoose");
+const config = require("../config/database");
 
 const TagSchema = mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    articles: {
-        type: [mongoose.Schema.Types.ObjectId],
-        required: true
-    }
-
-
+  name: {
+    type: String,
+    required: true,
+  },
+  count: {
+    type: Number,
+    required: true,
+  },
 });
 
-const Tag = module.exports = mongoose.model('Tag', TagSchema);
+const Tag = (module.exports = mongoose.model("Tag", TagSchema));
 
 module.exports.getTagByName = function (name, callback) {
-    const query = { name: name }
-    Tag.findOne(query, callback);
-}
-
-module.exports.getTagById = function (id, callback) {
-    Tag.findById(id, callback);
-}
+  const query = { name: name };
+  Tag.findOne(query, callback);
+};
 
 module.exports.addTag = function (newTag, callback) {
-
-    newTag.save(callback);
-}
+  newTag.save(callback);
+};
