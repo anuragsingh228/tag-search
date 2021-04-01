@@ -11,7 +11,6 @@ import {
 import { MatChipInputEvent } from '@angular/material/chips';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
-import { Route } from '@angular/compiler/src/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { Post } from '../post.model';
 
@@ -43,6 +42,8 @@ export class PostCreateComponent implements OnInit {
 
   ngOnInit() {
     this.postsService.getalltag().subscribe((res: any) => {
+      /********** Populating "tags"(contains tags of particular article) and alltags(contains all tags used) */
+
       this.alltags = res.alltags;
       this.filteredTags = this.tagCtrl.valueChanges.pipe(
         startWith(null),
@@ -51,6 +52,9 @@ export class PostCreateComponent implements OnInit {
         )
       );
     });
+
+    /************** routing defined to deferentiate between post create and post update     *********************/
+
     this.route.paramMap.subscribe((paraMap: ParamMap) => {
       if (paraMap.has('postId')) {
         this.mode = 'edit';
@@ -70,6 +74,8 @@ export class PostCreateComponent implements OnInit {
       }
     });
   }
+
+  /**************************************  Chip handling i.e tags array  ******************/
 
   add(event: MatChipInputEvent): void {
     const input = event.input;
@@ -109,6 +115,10 @@ export class PostCreateComponent implements OnInit {
       (tag) => tag.toLowerCase().indexOf(filterValue) === 0
     );
   }
+
+  /*************************************** Action on Save button click **********************/
+  /*********************Checking the mode, prepulating in case of update ********************/
+
   onSavePost(form: NgForm) {
     if (form.invalid) {
       return;
@@ -127,7 +137,7 @@ export class PostCreateComponent implements OnInit {
         this.tags
       );
     }
-
+    /*******************************  Reset the forms after creation of post  **************/
     form.resetForm();
     this.tags = [];
   }

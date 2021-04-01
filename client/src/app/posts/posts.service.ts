@@ -7,11 +7,15 @@ import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class PostsService {
-  private posts: Post[] = [];
-  private postsUpdated = new Subject<Post[]>();
-  private alltagsp = [];
+  private posts: Post[] = []; /*********    Contains all the posts      *********** */
+  private postsUpdated = new Subject<
+    Post[]
+  >(); /***    Will contain the updated posts upon addition and updation of posts  ********/
 
   constructor(private http: HttpClient, private router: Router) {}
+
+  /*****************                       for getting all the posts filter = ""                     *******************/
+  /*****************  filter= "?a=tag1&a=tag2&" will get posts containing tag1 and tag2 both in their tags array  ******/
 
   getPosts(filter: string) {
     this.http
@@ -33,11 +37,14 @@ export class PostsService {
         this.postsUpdated.next([...this.posts]);
       });
   }
+  /***************** This service will help get the updated post in the postlist              *****************/
+  /**************        This will return a Observable, you wil need to Subscribe while calling   ************/
 
   getPostUpdateListener() {
     return this.postsUpdated.asObservable();
   }
 
+  /********************   Retrieve a particular post with id   ***************/
   getPost(id: string) {
     return this.http.get<{
       _id: string;
@@ -46,6 +53,8 @@ export class PostsService {
       tags: string[];
     }>('http://localhost:3000/' + id);
   }
+
+  /*************************     Adding a new post and navigate to post-list page      ************************/
 
   addPost(title: string, content: string, tags: string[]) {
     const post: Post = {
@@ -62,14 +71,14 @@ export class PostsService {
       )
       .subscribe((responseData) => {
         const id = responseData.articleId;
-        console.log('*****************************');
         post.id = id;
-        console.log(responseData.msg);
         this.posts.push(post);
         this.postsUpdated.next([...this.posts]);
         this.router.navigate(['/']);
       });
   }
+
+  /*************************     Updating a post and navigate to post-list page      ************************/
 
   updatePost(id: string, title: string, content: string, tags: string[]) {
     const post: Post = { id: id, title: title, content: content, tags: tags };
@@ -83,6 +92,8 @@ export class PostsService {
     });
   }
 
+  /*******************    Delete a post and update the postsUpdated     ******************/
+
   deletePost(postId: string) {
     this.http.delete('http://localhost:3000/delete/' + postId).subscribe(() => {
       const updatedPosts = this.posts.filter((post) => post.id !== postId);
@@ -91,6 +102,7 @@ export class PostsService {
     });
   }
 
+  /******************* Get all tags to prepopulate alltags array to give autocomplete feature   *************/
   getalltag() {
     return this.http.get('http://localhost:3000/all/tags');
   }

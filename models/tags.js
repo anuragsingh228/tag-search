@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const config = require("../config/database");
 
 const TagSchema = mongoose.Schema({
   name: {

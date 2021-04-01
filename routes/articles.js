@@ -1,10 +1,9 @@
 const express = require("express");
-const _ = require("lodash");
 const router = express.Router();
 const Article = require("../models/articles");
 const Tag = require("../models/tags");
-const { result } = require("lodash");
 var ObjectId = require("mongoose").Types.ObjectId;
+
 /***********************************  Get all articles    *****************************************************/
 
 //Will fetch articles dynamically----  /?a=x&a=y&a=z ||||   will give   ['x', 'y', 'z']
@@ -12,15 +11,15 @@ var ObjectId = require("mongoose").Types.ObjectId;
 /********************************************************************************************************** */
 router.get("/", (req, res, next) => {
   if (req.query.a == undefined) {
-    awtags = [];
+    filtertags = [];
   } else {
-    awtags = req.query.a;
+    filtertags = req.query.a;
   }
-  console.log(awtags.length);
-  if (awtags.length === 0) {
+  if (filtertags.length === 0) {
     Article.find((err, articles) => {
       if (err) {
         console.log(err);
+        res.status(400);
       } else {
         res.status(200).json({
           message: "Articles fetched succesfuly!",
@@ -29,9 +28,10 @@ router.get("/", (req, res, next) => {
       }
     });
   } else {
-    Article.find({ tags: { $all: awtags } }, (err, articles) => {
+    Article.find({ tags: { $all: filtertags } }, (err, articles) => {
       if (err) {
         console.log(err);
+        res.status(400);
       } else {
         res.status(200).json({
           message: "Articles fetched succesfuly!",
@@ -55,16 +55,13 @@ router.post("/addarticle", (req, res, next) => {
     if (err) {
       res.json({ success: false, msg: "Failed to add article" });
     } else {
-      console.log(article);
       tagArray = article.tags;
       for (let index = 0; index < tagArray.length; index++) {
-        console.log(tagArray[index]);
         Tag.findOne({ name: tagArray[index] }, (err, tag) => {
-          console.log("index", index, tag);
           if (err) {
             console.log(err);
           } else {
-            if (!_.isEmpty(tag)) {
+            if (tag != undefined && tag.count >= 1) {
               Tag.update(
                 { name: tagArray[index] },
                 { $inc: { count: 1 } },
@@ -77,10 +74,6 @@ router.post("/addarticle", (req, res, next) => {
                 }
               );
             } else {
-              console.log("************************************");
-              console.log(index);
-              console.log(tagArray[index]);
-
               const newTag = new Tag({
                 name: tagArray[index],
                 count: 1,
@@ -130,13 +123,11 @@ router.put("/:id", (req, res) => {
   };
   newtags = narticle.tags;
   for (let index = 0; index < newtags.length; index++) {
-    console.log(newtags[index]);
     Tag.findOne({ name: newtags[index] }, (err, tag) => {
-      console.log("index", index, tag);
       if (err) {
         console.log(err);
       } else {
-        if (!_.isEmpty(tag)) {
+        if (tag != undefined && tag.count >= 1) {
           Tag.update(
             { name: newtags[index] },
             { $inc: { count: 1 } },
@@ -149,10 +140,6 @@ router.put("/:id", (req, res) => {
             }
           );
         } else {
-          console.log("************************************");
-          console.log(index);
-          console.log(newtags[index]);
-
           const newTag = new Tag({
             name: newtags[index],
             count: 1,
@@ -178,12 +165,8 @@ router.put("/:id", (req, res) => {
         console.log(err);
       } else {
         oldtags = article.tags;
-        console.log(newtags);
-        console.log(oldtags);
         for (let index = 0; index < oldtags.length; index++) {
-          console.log(oldtags[index]);
           Tag.findOne({ name: oldtags[index] }, (err, tag) => {
-            console.log("index", index, tag);
             if (err) {
               console.log(err);
             } else {
@@ -225,12 +208,9 @@ router.delete("/delete/:id", (req, res, next) => {
     if (err) {
       console.log(err);
     } else {
-      console.log(doc);
       oldtags = doc.tags;
       for (let index = 0; index < oldtags.length; index++) {
-        console.log(oldtags[index]);
         Tag.findOne({ name: oldtags[index] }, (err, tag) => {
-          console.log("index", index, tag);
           if (err) {
             console.log(err);
           } else {
@@ -262,7 +242,6 @@ router.delete("/delete/:id", (req, res, next) => {
   });
 
   Article.deleteOne({ _id: req.params.id }).then((result) => {
-    console.log(req.params.id);
     res.status(200).json({ message: "Post Deleted" });
   });
 });
@@ -277,8 +256,6 @@ router.get("/all/tags", (req, res, next) => {
       for (let index = 0; index < tags.length; index++) {
         alltags.push(tags[index].name);
       }
-
-      console.log(alltags);
       res.status(200).json({ message: "allatgs", alltags: alltags });
     }
   });
